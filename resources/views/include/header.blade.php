@@ -178,6 +178,11 @@
                     </div>
                 </div>
             </div>
+            @if ($errors->has('success'))
+                <div class="alert alert-success" hidden>
+                    {{ $errors->first('success') }}
+                </div>
+            @endif
             <div class="page-wrapper">
                 <div class="content">
                     @yield('content')
@@ -194,7 +199,15 @@
         <script src="{{ asset('assets/js/script.js') }}"></script>
         <script src="{{ asset('assets/js/summernote.js') }}"></script>
         <script src="{{ asset('custom.js') }}"></script>
-        <script>            
+        <script>  
+            $(document).ready(function(){
+                if($(".alert-danger").length > 0) {
+                    show_toast("Oops!",$(".alert-danger").text(),"error");
+                }
+                if($(".alert-success").length > 0) {
+                    show_toast("Success!",$(".alert-success").text(),"success");
+                }
+            });          
             function show_toast(title,msg,type,second = 3000)
             {
                 $.toast({

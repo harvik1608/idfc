@@ -7,6 +7,7 @@ use Illuminate\Support\Str;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Loan;
+use Auth;
 
 class LoanController extends Controller
 {
@@ -33,17 +34,17 @@ class LoanController extends Controller
             }
             $recordsTotal = Loan::count();
             $recordsFiltered = $query->count();
-            $rows = $query->offset($start)->limit($length)->orderBy('id', 'desc')->get();
+            $rows = $query->offset($start)->limit($length)->orderBy('id', 'asc')->get();
 
             $formattedData = [];
             foreach ($rows as $index => $row) {
                 $actions = '<div class="edit-delete-action">';
-                    $actions .= '<a href="' . url('plans/'.$row->id.'/edit/') . '" class="me-2 edit-icon p-2 text-success" title="Edit">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit">
-                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                        </svg>
-                    </a>';
+                    // $actions .= '<a href="' . url('plans/'.$row->id.'/edit/') . '" class="me-2 edit-icon p-2 text-success" title="Edit">
+                    //     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit">
+                    //         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    //         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    //     </svg>
+                    // </a>';
                     $actions .= '<a href="javascript:;" onclick="remove_row(\'' . url('plans/' . $row->id) . '\')" data-bs-toggle="modal" data-bs-target="#delete-modal" class="p-2" title="Delete">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2">
                             <polyline points="3 6 5 6 21 6"></polyline>
@@ -55,9 +56,12 @@ class LoanController extends Controller
                 $actions .= '</div>';
                 $formattedData[] = [
                     'id' => $start + $index + 1,
-                    'name' => $row->loan_account_no,
-                    'name' => $row->customer_id,
-                    'name' => $row->customer_name,
+                    'loan_account_no' => $row->loan_account_no,
+                    'customer_id' => $row->customer_id,
+                    'customer_name' => $row->customer_name,
+                    'email_id' => $row->email_id,
+                    'emi' => $row->emi,
+                    'location' => $row->city.", ".$row->state,
                     'actions' => $actions
                 ];
             }
@@ -148,20 +152,61 @@ class LoanController extends Controller
             // generate random file name
             $excelFile = Str::random(20) . '.' . $image->getClientOriginalExtension();
             $path = $image->move(public_path('uploads'), $excelFile);
-            $file = asset("uploads/".$excelFile);
-        }        
-
+            $file = public_path('uploads') . '/' . $excelFile;
+        } 
+        $total_rows = 0;       
+        $rows = [];
         $spreadsheet = IOFactory::load($file);
         $sheet = $spreadsheet->getActiveSheet();
-        $rows = $sheet->toArray();
-        preview(count($rows));
-        array_shift($rows);
+        $rowIndex = 0;
+        foreach ($sheet->getRowIterator() as $row) {
+            if ($rowIndex === 0) {
+                $rowIndex++;
+                continue;
+            }
+            $total_rows++;
+            $cellIterator = $row->getCellIterator();
+            $cellIterator->setIterateOnlyExistingCells(false);
 
-        $result = [];
-        foreach ($rows as $row) {
-            echo $row[0]."<br>";
+            $rowData = [];
+            foreach ($cellIterator as $cell) {
+                $rowData[] = $cell->getValue();
+            }
+            $rows[] = array(
+                "loan_account_no" => $rowData[1],
+                "customer_id" => $rowData[2],
+                "customer_cif" => $rowData[4],
+                "count" => $rowData[5],
+                "customer_name" => $rowData[6],
+                "product" => $rowData[7],
+                "emi" => $rowData[8],
+                "pos" => $rowData[9],
+                "loan_amount" => $rowData[10],
+                "pennanent_address" => $rowData[11],
+                "permanent_address" => $rowData[12],
+                "communication_address" => $rowData[13],
+                "pincode" => $rowData[14],
+                "city" => $rowData[15],
+                "state" => $rowData[16],
+                "email_id" => $rowData[17],
+                "mobile_no1" => $rowData[18],
+                "mobile_no2" => $rowData[19],
+                "lok_adalat" => $rowData[20],
+                "advocate" => $rowData[21],
+                "court_location" => $rowData[22],
+                "rcm_name" => $rowData[23],
+                "contact_no" => $rowData[24],
+                "created_by" => Auth::user()->id,
+                "created_at" => date("Y-m-d H:i:s"),
+            );
+        }
+        foreach (array_chunk($rows, 300) as $chunk) {
+            Loan::insert($chunk);
         }
 
-        Storage::delete($uploadedPath);
+        if (file_exists($file)) {
+            unlink($file);
+        }
+        return response()->json(['success' => true,'message' => "Total $total_rows rows added."], 200);
     }
 }
