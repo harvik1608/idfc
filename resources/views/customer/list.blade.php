@@ -9,20 +9,12 @@
         </div>
     </div>
     <ul class="table-top-head">
-		<!-- <li>
-			<a data-bs-toggle="tooltip" data-bs-placement="top" aria-label="Pdf" data-bs-original-title="Pdf">
-				<img src="{{ asset('assets/img/icons/pdf.svg') }}" alt="img">
-			</a>
-		</li> -->
 		<li>
 			<a href="{{ route('admin.customer.export') }}" data-bs-toggle="tooltip" data-bs-placement="top" aria-label="Excel" data-bs-original-title="Export To Excel">
 				<img src="{{ asset('assets/img/icons/excel.svg') }}" alt="img">
 			</a>
 		</li>
 	</ul>
-    <!-- <div class="page-btn import">
-        <a href="javascript:;" onclick="open_modal()" class="btn btn-primary text-white"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-download me-1"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Import</a>
-    </div> -->
 </div>
 <div class="card">
     <div class="card-header d-flex align-items-center justify-content-between flex-wrap row-gap-3">

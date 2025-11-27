@@ -13,6 +13,12 @@ if (! function_exists('format_date')) {
     }
 }
 
+if (! function_exists('format_text')) {
+    function format_text($text) {
+        return ucwords(strtolower($text));
+    }
+}
+
 if (! function_exists('currency')) {
     function currency() {
         return "₹";

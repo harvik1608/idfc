@@ -159,14 +159,6 @@
                                 </ul>
                             </li>
                             <li class="submenu-open">
-                                <h6 class="submenu-hdr">Customers</h6>
-                                <ul id="main_menu_list">
-                                    <li class="permission" data-module="customer" data-title="Customer">
-                                        <a href="{{ url('customers') }}"><i data-feather="box"></i><span>Customer List</span></a>
-                                    </li>
-                                </ul>
-                            </li>
-                            <li class="submenu-open">
                                 <h6 class="submenu-hdr">Loans</h6>
                                 <ul id="main_menu_list">
                                     <li class="permission" data-module="loan" data-title="Loan">

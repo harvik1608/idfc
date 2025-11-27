@@ -37,10 +37,7 @@ class CustomerController extends Controller
             )
             ->groupBy('customer_id', 'customer_name')->orderBy('customer_name','asc');
             if (!empty($searchValue)) {
-                if (!empty($searchValue)) {
-                    $query->havingRaw('(customer_name LIKE ? OR customer_id LIKE ?)', ["%{$searchValue}%", "%{$searchValue}%"]);
-                }
-
+                $query->havingRaw('(customer_name LIKE ? OR customer_id LIKE ?)', ["%{$searchValue}%", "%{$searchValue}%"]);
             }
             $recordsTotal = Loan::distinct('customer_id')->count('customer_id');
             $filteredRows = $query->get() ?? collect();
@@ -184,33 +181,124 @@ class CustomerController extends Controller
 
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setCellValue('A1', 'ID')
-        ->setCellValue('B1', 'EMI')
-        ->setCellValue('C1', 'Loan Amount')
-        ->setCellValue('D1', 'POS');
+        $sheet->setCellValue('A1', 'Sr. No')
+        ->setCellValue('B1', 'Loan Account Number')
+        ->setCellValue('C1', 'Cust Id')
+        ->setCellValue('D1', 'Cust CIF')
+        ->setCellValue('E1', 'Count')
+        ->setCellValue('F1', 'Customer Name')
+        ->setCellValue('G1', 'Product')
+        ->setCellValue('H1', 'EMI')
+        ->setCellValue('I1', 'POS')
+        ->setCellValue('J1', 'Loan Amount')
+        ->setCellValue('K1', 'Pennanent Address')
+        ->setCellValue('L1', 'Permanent Address')
+        ->setCellValue('M1', 'Communication Address')
+        ->setCellValue('N1', 'Pincode')
+        ->setCellValue('O1', 'City')
+        ->setCellValue('P1', 'State')
+        ->setCellValue('Q1', 'Email ID')
+        ->setCellValue('R1', 'Mobile No 1')
+        ->setCellValue('S1', 'Mobile No 2')
+        ->setCellValue('T1', 'Lok Adalat YES/ NO')
+        ->setCellValue('U1', 'Advocate')
+        ->setCellValue('V1', 'Court Location')
+        ->setCellValue('W1', 'CM/ACM/RCM Name')
+        ->setCellValue('X1', 'Contact No');
 
-        $query = Loan::query();
-        $query = $query->where("customer_id",$customer_id);
-        $customers = $query->get() ?? collect();
-        $row = 2;
+        $headerStyle = [
+            'font' => [
+                'bold' => true,
+                'color' => ['rgb' => '000000'], // white text
+                'size' => 12
+            ],
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'color' => ['rgb' => 'efefef'], // black background (use any hex color)
+            ],
+            'alignment' => [
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+            ]
+        ];
+
+        // Apply to header row
+        $sheet->getStyle('A1:X1')->applyFromArray($headerStyle);
+
+        foreach (range('A', 'X') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+        $loans = Loan::where("customer_id",$customer_id)->get();
         $total_loan_amount = 0;
+        $row = 2;
         $no = 0;
-        foreach($customers as $customer) {
+        foreach($loans as $loan) {
             $no++;
-            $total_loan_amount = $total_loan_amount + $customer->loan_amount;
-            $sheet->setCellValue('A'.$row, $no)
-            ->setCellValue('B'.$row, $customer->emi)
-            ->setCellValue('C'.$row, number_format($customer->loan_amount,2))
-            ->setCellValue('D'.$row, $customer->pos);
+            $total_loan_amount = $total_loan_amount + $loan->loan_amount;
+
+            $sheet->setCellValue('A'.$row, $no);
+            $sheet->setCellValue('B'.$row, $loan->loan_account_no);
+            $sheet->setCellValue('C'.$row, $loan->customer_id);
+            $sheet->setCellValue('D'.$row, $loan->customer_cif);
+            $sheet->setCellValue('E'.$row, $loan->count);
+            $sheet->setCellValue('F'.$row, $loan->customer_name);
+            $sheet->setCellValue('G'.$row, $loan->product);
+            $sheet->setCellValue('H'.$row, $loan->emi);
+            $sheet->setCellValue('I'.$row, $loan->pos);
+            $sheet->setCellValue('J'.$row, currency()."".number_format($loan->loan_amount,2));
+            $sheet->setCellValue('K'.$row, $loan->pennanent_address);
+            $sheet->setCellValue('L'.$row, $loan->permanent_address);
+            $sheet->setCellValue('M'.$row, $loan->communication_address);
+            $sheet->setCellValue('N'.$row, $loan->pincode);
+            $sheet->setCellValue('O'.$row, $loan->city);
+            $sheet->setCellValue('P'.$row, $loan->state);
+            $sheet->setCellValue('Q'.$row, $loan->email_id);
+            $sheet->setCellValue('R'.$row, $loan->mobile_no1);
+            $sheet->setCellValue('S'.$row, $loan->mobile_no2);
+            $sheet->setCellValue('T'.$row, $loan->lok_adalat);
+            $sheet->setCellValue('U'.$row, $loan->advocate);
+            $sheet->setCellValue('V'.$row, $loan->court_location);
+            $sheet->setCellValue('W'.$row, $loan->rcm_name);
+            $sheet->setCellValue('X'.$row, $loan->contact_no);
             $row++;
         }
-        $sheet->setCellValue('C'.$row, number_format($total_loan_amount,2));
+        $sheet->setCellValue('J'.$row, currency()."".number_format($total_loan_amount,2));
         $writer = new Xlsx($spreadsheet);
-        
         $file = Str::slug($customer->customer_name,'_');
         $fileName = $file.'.xlsx';
         $writer->save(public_path($fileName));
 
         return response()->download(public_path($fileName));
+
+        // $spreadsheet = new Spreadsheet();
+        // $sheet = $spreadsheet->getActiveSheet();
+        // $sheet->setCellValue('A1', 'ID')
+        // ->setCellValue('B1', 'EMI')
+        // ->setCellValue('C1', 'Loan Amount')
+        // ->setCellValue('D1', 'POS');
+
+        // $query = Loan::query();
+        // $query = $query->where("customer_id",$customer_id);
+        // $customers = $query->get() ?? collect();
+        // $row = 2;
+        // $total_loan_amount = 0;
+        // $no = 0;
+        // foreach($customers as $customer) {
+        //     $no++;
+        //     $total_loan_amount = $total_loan_amount + $customer->loan_amount;
+        //     $sheet->setCellValue('A'.$row, $no)
+        //     ->setCellValue('B'.$row, $customer->emi)
+        //     ->setCellValue('C'.$row, number_format($customer->loan_amount,2))
+        //     ->setCellValue('D'.$row, $customer->pos);
+        //     $row++;
+        // }
+        // $sheet->setCellValue('C'.$row, number_format($total_loan_amount,2));
+        // $writer = new Xlsx($spreadsheet);
+        
+        // $file = Str::slug($customer->customer_name,'_');
+        // $fileName = $file.'.xlsx';
+        // $writer->save(public_path($fileName));
+
+        // return response()->download(public_path($fileName));
     }
 }

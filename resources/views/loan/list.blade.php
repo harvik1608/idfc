@@ -8,6 +8,13 @@
             <h6></h6>
         </div>
     </div>
+    <ul class="table-top-head">
+		<li>
+			<a href="{{ route('admin.loan.export') }}" data-bs-toggle="tooltip" data-bs-placement="left" aria-label="Excel" data-bs-original-title="Export To Excel">
+				<img src="{{ asset('assets/img/icons/excel.svg') }}" alt="img">
+			</a>
+		</li>
+	</ul>
     <div class="page-btn">
         <a href="javascript:;" onclick="open_modal()" class="btn btn-primary text-white"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-download me-1"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Import</a>
     </div>
@@ -26,11 +33,10 @@
                 <thead class="thead-light">
                     <tr>
                         <th width="5%">#</th>
-                        <th width="10%">Loan Account No</th>
-                        <th width="10%">Customer ID</th>
-                        <th width="10%">Name</th>
+                        <th width="15%">Loan Account No</th>
+                        <th width="15%">Customer ID</th>
+                        <th width="20%">Name</th>
                         <th width="10%">Email</th>
-                        <th width="10%">EMI</th>
                         <th width="20%">Location</th>
                         <th width="10%" class="no-sort"></th>
                     </tr>
@@ -111,7 +117,6 @@
 	                { data: 'customer_id' },
 	                { data: 'customer_name' },
 	                { data: 'email_id' },
-	                { data: 'emi' },
 	                { data: 'location' },
 	                { 
 	                    data: 'actions', 
