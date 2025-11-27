@@ -5,13 +5,21 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
+use App\Models\Loan;
 use Auth;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        return view('dashboard');
+        $cities = Loan::selectRaw('city, COUNT(*) as total')->groupBy('city')->orderByDesc('total')->limit(10)->get();
+        $all_cities = $cities->pluck('city')->toArray();
+        $city_counts = $cities->pluck('total')->toArray();
+
+        return view('dashboard', [
+            'all_cities' => $all_cities,
+            'city_counts' => $city_counts
+        ]);
     }
 
     public function general_settings()

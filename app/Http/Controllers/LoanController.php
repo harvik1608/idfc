@@ -28,12 +28,7 @@ class LoanController extends Controller
 
             $query = Loan::query();
             if (!empty($searchValue)) {
-                $query->whereRaw('(customer_name LIKE ? OR customer_id LIKE ?)', ["%{$searchValue}%", "%{$searchValue}%"]);
-                // $query->where(function ($q) use ($searchValue) {
-                //     $q->where('customer_name', 'like', "%{$searchValue}%");
-                //     $q->where('loan_account_no', 'like', "%{$searchValue}%");
-                //     $q->where('customer_id', 'like', "%{$searchValue}%");
-                // });
+                $query->whereRaw('(loan_account_no LIKE ? OR customer_id LIKE ? OR customer_name LIKE ?)', ["%{$searchValue}%","%{$searchValue}%","%{$searchValue}%"]);
             }
             $recordsTotal = Loan::count();
             $recordsFiltered = $query->count();

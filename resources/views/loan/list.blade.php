@@ -100,6 +100,7 @@
 	        $('#tblList').DataTable({
 	            "processing": true,
 	            "serverSide": true,
+	            "pageLength": 25,
 	            "ajax": {
 	                "url": "{{ route('admin.loans.load') }}",
 	                "type": "GET",
@@ -111,6 +112,11 @@
 	            "bFilter": true,
 	            "sDom": 'fBtlpi',
 	            "ordering": true,
+	            "info": true,
+	            infoCallback: function(settings, start, end, max, total, pre) {
+			        $('#totalRecords').html("Total Records: " + total);
+			        return pre;
+			    },
 	            "columns": [
 	                { data: 'id' },
 	                { data: 'loan_account_no' },
